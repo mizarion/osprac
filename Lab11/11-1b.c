@@ -17,7 +17,11 @@ int main(void)
 	struct mymsgbuf
 	{
 		long mtype;
-		char mtext[81];
+		struct
+		{
+			short sinfo;
+			float finfo;
+		} info;
 	} mybuf;
 
 	if ((key = ftok(pathname, 0)) < 0)
@@ -40,18 +44,14 @@ int main(void)
 			printf("Can\'t receive message from queue\n");
 			exit(-1);
 		}
-		//
-		// If the received message is of type LAST_MESSAGE,
-		// then terminate and remove the message queue from the system.
-		// Otherwise, print the text of the received message.
-		//
+
 		if (mybuf.mtype == LAST_MESSAGE)
 		{
 			msgctl(msqid, IPC_RMID, (struct msqid_ds*)NULL);
 			exit(0);
 		}
 
-		printf("message type = %ld, info = %s\n", mybuf.mtype, mybuf.mtext);
+		printf("message type = %ld, sinfo = %d, finfo = %d\n", mybuf.mtype, mybuf.info.sinfo, mybuf.info.finfo);
 	}
 
 	return 0;

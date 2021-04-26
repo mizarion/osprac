@@ -15,10 +15,14 @@ int main(void)
 	key_t  key;     // IPC key
 	int i, len;      // Cycle counter and the length of the informative part of the message
 
-	struct mymsgbuf // Custom structure for the message
+	struct mymsgbuf
 	{
 		long mtype;
-		char mtext[81];
+		struct
+		{
+			short sinfo;
+			float finfo;
+		} info;
 	} mybuf;
 
 	if ((key = ftok(pathname, 0)) < 0)
@@ -26,10 +30,7 @@ int main(void)
 		printf("Can\'t generate key\n");
 		exit(-1);
 	}
-	//
-	// Trying to get access by key to the message queue, if it exists,
-	// or create it, with read & write access for all users.
-	//
+
 	if ((msqid = msgget(key, 0666 | IPC_CREAT)) < 0)
 	{
 		printf("Can\'t get msqid\n");
@@ -40,17 +41,12 @@ int main(void)
 
 	for (i = 1; i <= 5; i++)
 	{
-		//
-		// Fill in the structure for the message and
-		// determine the length of the informative part.
-		//
 		mybuf.mtype = 1;
-		strcpy(mybuf.mtext, "This is text message");
-		len = sizeof(mybuf);
-		//
-		// Send the message. If there is an error,
-		// report it and delete the message queue from the system.
-		//
+		mybuf.info.sinfo = 123;
+		mybuf.info.sinfo = 123;
+
+		len = sizeof(mybuf.info);
+
 		if (msgsnd(msqid, (struct msgbuf*)&mybuf, len, 0) < 0)
 		{
 			printf("Can\'t send message to queue\n");
